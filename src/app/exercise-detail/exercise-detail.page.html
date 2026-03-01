@@ -1,0 +1,165 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tab1"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ exercise?.name || 'Exercise Detail' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="detail-content">
+  <section class="hero-section">
+    <ng-container *ngIf="!loading && exercise; else heroSkeleton">
+      <div class="title-row">
+        <h1>{{ exercise.name }}</h1>
+        <ion-badge color="tertiary">{{ exercise.body_part || 'General' }}</ion-badge>
+      </div>
+
+      <ion-badge *ngIf="isCompletedToday" color="success" class="status-badge">
+        Completed Today
+      </ion-badge>
+    </ng-container>
+  </section>
+
+  <section class="media-section">
+    <ng-container *ngIf="loading; else mediaContent">
+      <ion-skeleton-text animated class="media-skeleton"></ion-skeleton-text>
+    </ng-container>
+    <ng-template #mediaContent>
+      <div class="media-box" *ngIf="exercise?.media_path as mediaPath; else noMedia">
+        <video *ngIf="isVideoMedia(mediaPath); else imageMedia" controls preload="metadata">
+          <source [src]="mediaPath" />
+        </video>
+        <ng-template #imageMedia>
+          <img [src]="mediaPath" [alt]="exercise?.name || 'Exercise media'" />
+        </ng-template>
+      </div>
+      <ng-template #noMedia>
+        <div class="empty-media">
+          <ion-icon name="image-outline"></ion-icon>
+          <p>No media available</p>
+        </div>
+      </ng-template>
+    </ng-template>
+  </section>
+
+  <section class="segment-wrap">
+    <ion-segment mode="ios" [(ngModel)]="activeSegment">
+      <ion-segment-button value="instructions">
+        <ion-label>Instructions</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="logs">
+        <ion-label>Logs</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </section>
+
+  <section class="panel" *ngIf="activeSegment === 'instructions'">
+    <p class="instructions-text">
+      {{ exercise?.instructions?.trim() || 'No instructions provided' }}
+    </p>
+  </section>
+
+  <section class="panel" *ngIf="activeSegment === 'logs'">
+    <div class="logs-section">
+      <h3>Workout Sets (Today)</h3>
+
+      <ion-grid class="sets-grid">
+        <ion-row
+          *ngFor="let set of loggedSets; let i = index"
+          class="set-row"
+          [class.deleting]="isLoggedSetDeleting(set.id)">
+          <ion-col size="2" class="set-label">
+            Set {{ i + 1 }}
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-input
+              type="number"
+              placeholder="Reps"
+              [(ngModel)]="set.reps"
+              [disabled]="isLoggedSetBusy(set.id)"
+              (ionBlur)="onLoggedSetBlur(set)">
+            </ion-input>
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-input
+              type="number"
+              placeholder="Weight"
+              [(ngModel)]="set.weight"
+              [disabled]="isLoggedSetBusy(set.id)"
+              (ionBlur)="onLoggedSetBlur(set)">
+            </ion-input>
+          </ion-col>
+
+          <ion-col size="2" class="delete-col">
+            <ion-button
+              fill="clear"
+              color="danger"
+              [disabled]="savingWorkout || loading || isLoggedSetBusy(set.id)"
+              (click)="deleteLoggedSet(set.id)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+
+        <ion-row *ngFor="let set of inputSets; let j = index" class="set-row">
+          <ion-col size="2" class="set-label">
+            Set {{ loggedSets.length + j + 1 }}
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-input
+              type="number"
+              placeholder="Reps"
+              [(ngModel)]="inputSets[j].reps">
+            </ion-input>
+          </ion-col>
+
+          <ion-col size="4">
+            <ion-input
+              type="number"
+              placeholder="Weight"
+              [(ngModel)]="inputSets[j].weight">
+            </ion-input>
+          </ion-col>
+
+          <ion-col size="2" class="delete-col">
+            <ion-button
+              fill="clear"
+              color="danger"
+              [disabled]="savingWorkout || loading"
+              (click)="removeInputSet(j)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <p *ngIf="loggedSets.length === 0 && inputSets.length === 0" class="no-logs-text">
+        No saved sets yet today. Add sets and tap Save Workout.
+      </p>
+    </div>
+
+    <ion-button expand="block" (click)="addSet()">
+      + ADD SET
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      color="success"
+      [disabled]="savingWorkout || loading || !hasValidSets()"
+      (click)="saveWorkout()">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      Save Workout
+    </ion-button>
+  </section>
+</ion-content>
+
+<ng-template #heroSkeleton>
+  <div class="title-row">
+    <ion-skeleton-text animated style="width: 60%; height: 28px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 84px; height: 24px; border-radius: 12px;"></ion-skeleton-text>
+  </div>
+</ng-template>

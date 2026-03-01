@@ -1,0 +1,48 @@
+<ion-content fullscreen class="login-bg">
+  <div class="login-container">
+
+    <h1 class="app-title">Create Account</h1>
+    <p class="subtitle">Start tracking your workouts</p>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        placeholder="Full Name"
+        [(ngModel)]="name">
+      </ion-input>
+    </ion-item>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        type="email"
+        placeholder="Email"
+        [(ngModel)]="email">
+      </ion-input>
+    </ion-item>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        type="tel"
+        placeholder="Mobile Number"
+        [(ngModel)]="mobile">
+      </ion-input>
+    </ion-item>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        type="password"
+        placeholder="Password"
+        [(ngModel)]="password">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" class="login-btn" (click)="register()">
+      Create Account
+    </ion-button>
+
+    <ion-text class="signup-text">
+      Already have an account?
+      <span class="signup-link" (click)="goToLogin()">Login</span>
+    </ion-text>
+
+  </div>
+</ion-content>

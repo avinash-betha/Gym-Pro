@@ -1,25 +1,17 @@
 import { Component } from '@angular/core';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 
-import { AuthService } from '../auth/auth.service';
 import { SupabaseService } from '../shared/services/supabase.service';
-import { Database } from '../shared/types/supabase.types';
+import { AuthService } from '../auth/auth.service';
 
-type WorkoutSplitRow = Database['public']['Tables']['workout_splits']['Row'];
-type ExerciseRow = Database['public']['Tables']['exercises']['Row'];
-type CompletionRow = Pick<
-  Database['public']['Tables']['exercise_completion']['Row'],
-  'id' | 'exercise_id'
->;
-
-interface SplitExerciseJoinRow {
-  order_index: number;
-  exercises: ExerciseRow | ExerciseRow[] | null;
+interface WorkoutSplit {
+  id: string;
+  split_label: string;
+  day_of_week: number;
 }
 
-interface TodayExercise {
+interface Exercise {
   id: string;
   name: string;
   body_part: string | null;
@@ -28,85 +20,106 @@ interface TodayExercise {
   order_index: number;
 }
 
+interface CompletionRow {
+  id: string;
+  exercise_id: string;
+}
+
+interface SplitExerciseRow {
+  order_index: number;
+  exercises:
+    | {
+        id: string;
+        name: string;
+        body_part: string | null;
+        media_path: string | null;
+        instructions: string | null;
+      }
+    | {
+        id: string;
+        name: string;
+        body_part: string | null;
+        media_path: string | null;
+        instructions: string | null;
+      }[]
+    | null;
+}
+
 @Component({
-  selector: 'app-tab1',
+  selector: 'app-home',
   standalone: true,
   imports: [IonicModule, CommonModule],
-  templateUrl: 'tab1.page.html',
-  styleUrls: ['tab1.page.scss'],
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
 })
-export class Tab1Page {
+export class HomePage {
   loading = false;
   errorMessage = '';
 
-  splitLabel = '';
   isRestDay = false;
-  exercises: TodayExercise[] = [];
-  completedMap: Record<string, boolean> = {};
+  splitName = '';
+  exercises: Exercise[] = [];
 
   private userId: string | null = null;
   private todayDate = '';
+  completedMap: Record<string, boolean> = {};
   private pendingExerciseIds = new Set<string>();
 
   constructor(
-    private auth: AuthService,
     private supabase: SupabaseService,
-    private toastCtrl: ToastController,
-    private router: Router
+    private auth: AuthService,
+    private toastCtrl: ToastController
   ) {}
 
   ionViewWillEnter() {
-    void this.loadTodayWorkout();
+    this.loadHomeData();
   }
 
-  async loadTodayWorkout() {
+  async loadHomeData() {
     this.loading = true;
     this.errorMessage = '';
-    this.isRestDay = false;
-    this.splitLabel = '';
     this.exercises = [];
     this.completedMap = {};
+    this.isRestDay = false;
+    this.splitName = '';
+    this.todayDate = this.getLocalDateString(new Date());
 
     try {
-      await this.ensureAuthenticatedUser();
+      await this.ensureUser();
+      const split = await this.fetchTodaySplit();
 
-      const todaySplit = await this.fetchTodaySplit();
-      if (!todaySplit) {
+      if (!split) {
         this.isRestDay = true;
         return;
       }
 
-      this.splitLabel = todaySplit.split_label;
-
-      this.exercises = await this.fetchExercisesForSplit(todaySplit.id);
-      await this.reloadCompletionState();
+      this.splitName = split.split_label;
+      this.exercises = await this.fetchExercisesForSplit(split.id);
+      await this.fetchTodayCompletionStatus();
     } catch (error: unknown) {
-      console.error('LOAD TODAY WORKOUT ERROR:', error);
-      this.errorMessage = this.getErrorMessage(
-        error,
-        'Unable to load today\'s workout'
-      );
-      await this.showToast(this.errorMessage, 'danger');
+      console.error('HOME LOAD ERROR:', error);
+      this.errorMessage = this.getErrorMessage(error, 'Failed to load home data');
+      await this.presentToast(this.errorMessage, 'danger');
     } finally {
       this.loading = false;
     }
   }
 
-  async onCompletionToggle(exerciseId: string, checked: boolean) {
+  async onCompletionToggle(exerciseId: string, completed: boolean) {
     if (!this.userId || this.pendingExerciseIds.has(exerciseId)) {
       return;
     }
 
-    if (checked === this.isCompleted(exerciseId)) {
+    const previousState = !!this.completedMap[exerciseId];
+    if (completed === previousState) {
       return;
     }
 
     this.pendingExerciseIds.add(exerciseId);
-    const previousState = !!this.completedMap[exerciseId];
-    this.completedMap[exerciseId] = checked;
+    this.completedMap[exerciseId] = completed;
 
     try {
-      if (checked) {
+      if (completed) {
         const { error } = await this.supabase.client
           .from('exercise_completion')
           .upsert(
@@ -125,7 +138,7 @@ export class Tab1Page {
           throw error;
         }
 
-        await this.showToast('Marked complete', 'success');
+        await this.presentToast('Marked complete', 'success');
       } else {
         const { error } = await this.supabase.client
           .from('exercise_completion')
@@ -138,12 +151,12 @@ export class Tab1Page {
           throw error;
         }
 
-        await this.showToast('Marked incomplete', 'success');
+        await this.presentToast('Marked incomplete', 'success');
       }
     } catch (error: unknown) {
-      console.error('TOGGLE COMPLETION ERROR:', error);
+      console.error('COMPLETION TOGGLE ERROR:', error);
       this.completedMap[exerciseId] = previousState;
-      await this.showToast('Could not update completion', 'danger');
+      await this.presentToast('Could not update completion status', 'danger');
     } finally {
       this.pendingExerciseIds.delete(exerciseId);
     }
@@ -157,38 +170,36 @@ export class Tab1Page {
     return this.pendingExerciseIds.has(exerciseId);
   }
 
-  trackByExerciseId(_: number, exercise: TodayExercise): string {
+  trackByExercise(_: number, exercise: Exercise): string {
     return exercise.id;
   }
 
-  async openExerciseDetail(exerciseId: string): Promise<void> {
-    await this.router.navigate(['/tabs/exercise', exerciseId]);
-  }
-
-  private async ensureAuthenticatedUser() {
+  private async ensureUser() {
     const user = await this.auth.getUser();
     if (!user) {
       throw new Error('User not authenticated');
     }
 
     this.userId = user.id;
-    this.todayDate = this.getLocalDateString(new Date());
   }
 
-  private async fetchTodaySplit(): Promise<WorkoutSplitRow | null> {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
+  private async fetchTodaySplit(): Promise<WorkoutSplit | null> {
+    const todayDayOfWeek = new Date().getDay();
 
-    console.log('[HOME DEBUG] JS getDay():', dayOfWeek);
-    console.log('[HOME DEBUG] Full date:', today);
-    console.log('[HOME DEBUG] ISO date:', today.toISOString());
+    const { data, error } = await this.supabase.client
+      .from('workout_splits')
+      .select('id, split_label, day_of_week')
+      .eq('day_of_week', todayDayOfWeek)
+      .maybeSingle();
 
-    await this.logAllSplits();
+    if (error) {
+      throw error;
+    }
 
-    return this.fetchSplitByDay(dayOfWeek);
+    return data;
   }
 
-  private async fetchExercisesForSplit(splitId: string): Promise<TodayExercise[]> {
+  private async fetchExercisesForSplit(splitId: string): Promise<Exercise[]> {
     const { data, error } = await this.supabase.client
       .from('split_exercises')
       .select(`
@@ -197,10 +208,8 @@ export class Tab1Page {
           id,
           name,
           body_part,
-          sort_order,
           media_path,
-          instructions,
-          created_at
+          instructions
         )
       `)
       .eq('split_id', splitId)
@@ -210,10 +219,14 @@ export class Tab1Page {
       throw error;
     }
 
-    const rows = (data ?? []) as SplitExerciseJoinRow[];
+    const rows = (data ?? []) as SplitExerciseRow[];
 
     return rows
       .map(row => {
+        if (!row.exercises) {
+          return null;
+        }
+
         const exercise = Array.isArray(row.exercises)
           ? row.exercises[0]
           : row.exercises;
@@ -231,10 +244,14 @@ export class Tab1Page {
           order_index: row.order_index,
         };
       })
-      .filter((exercise): exercise is TodayExercise => !!exercise);
+      .filter((exercise): exercise is Exercise => !!exercise);
   }
 
-  private async reloadCompletionState(): Promise<void> {
+  private async fetchTodayCompletionStatus() {
+    if (!this.userId) {
+      return;
+    }
+
     this.completedMap = this.exercises.reduce<Record<string, boolean>>(
       (map, exercise) => {
         map[exercise.id] = false;
@@ -243,14 +260,14 @@ export class Tab1Page {
       {}
     );
 
-    if (!this.userId || this.exercises.length === 0) {
+    if (this.exercises.length === 0) {
       return;
     }
 
     const exerciseIds = this.exercises.map((exercise) => exercise.id);
     const { data, error } = await this.supabase.client
       .from('exercise_completion')
-      .select('exercise_id')
+      .select('id, exercise_id')
       .eq('user_id', this.userId)
       .eq('completed_on', this.todayDate)
       .in('exercise_id', exerciseIds);
@@ -283,7 +300,7 @@ export class Tab1Page {
     return fallback;
   }
 
-  private async showToast(
+  private async presentToast(
     message: string,
     color: 'success' | 'danger' | 'warning' | 'primary'
   ) {
@@ -292,45 +309,7 @@ export class Tab1Page {
       duration: 2200,
       color,
       position: 'bottom',
-      mode: 'ios',
     });
     await toast.present();
-  }
-
-  private async logAllSplits(): Promise<void> {
-    const { data, error } = await this.supabase.client
-      .from('workout_splits')
-      .select('*')
-      .order('day_of_week', { ascending: true });
-
-    if (error) {
-      console.log('[HOME DEBUG] Error fetching all splits:', error);
-      return;
-    }
-
-    console.log('[HOME DEBUG] All splits:', data);
-  }
-
-  private async fetchSplitByDay(dayOfWeek: number): Promise<WorkoutSplitRow | null> {
-    console.log(`[HOME DEBUG] Querying split for day_of_week=${dayOfWeek}`);
-
-    const { data, error } = await this.supabase.client
-      .from('workout_splits')
-      .select('*')
-      .eq('day_of_week', dayOfWeek)
-      .maybeSingle();
-
-    if (error) {
-      console.log(`[HOME DEBUG] Split error for day ${dayOfWeek}:`, error);
-      throw error;
-    }
-
-    console.log(`[HOME DEBUG] Split result for day ${dayOfWeek}:`, data);
-    if (!data) {
-      console.log('[HOME DEBUG] No split found. Rest Day fallback enabled.');
-      return null;
-    }
-
-    return data as WorkoutSplitRow;
   }
 }

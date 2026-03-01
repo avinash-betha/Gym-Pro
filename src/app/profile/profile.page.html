@@ -1,0 +1,109 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="profile-content">
+  <section *ngIf="loading" class="state-box">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading profile...</p>
+  </section>
+
+  <section *ngIf="!loading && errorMessage" class="state-box error-box">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ errorMessage }}</p>
+    <ion-button fill="outline" size="small" (click)="loadProfileData()">
+      Retry
+    </ion-button>
+  </section>
+
+  <div *ngIf="!loading && !errorMessage" class="content-wrap">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Personal Info</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label position="stacked">Full Name</ion-label>
+          <ion-input
+            type="text"
+            [(ngModel)]="fullName"
+            placeholder="Your name">
+          </ion-input>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Height (cm)</ion-label>
+          <ion-input
+            type="number"
+            [(ngModel)]="heightCm"
+            placeholder="e.g. 175">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" [disabled]="savingProfile" (click)="saveProfile()">
+          Save Profile
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Daily Weight Entry</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="helper-text">Update your weight for today.</p>
+        <ion-item lines="none">
+          <ion-label position="stacked">Weight (lbs)</ion-label>
+          <ion-input
+            type="number"
+            [(ngModel)]="todayWeight"
+            placeholder="e.g. 165.4">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" [disabled]="savingWeight" (click)="saveTodayWeight()">
+          Save Today's Weight
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Notification Preferences</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>Workout Reminder</ion-label>
+          <ion-toggle [(ngModel)]="gymReminderEnabled"></ion-toggle>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Reminder Time</ion-label>
+          <ion-input
+            type="time"
+            [disabled]="!gymReminderEnabled"
+            [(ngModel)]="dailyReminderTime">
+          </ion-input>
+        </ion-item>
+
+        <ion-button
+          expand="block"
+          [disabled]="savingPreferences"
+          (click)="saveNotificationPreferences()">
+          Save Preferences
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button
+      expand="block"
+      color="danger"
+      fill="outline"
+      class="logout-btn"
+      (click)="logout()">
+      Logout
+    </ion-button>
+  </div>
+</ion-content>

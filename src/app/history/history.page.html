@@ -1,0 +1,72 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>History</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="history-content">
+  <section *ngIf="loading" class="state-box">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading workout history...</p>
+  </section>
+
+  <section *ngIf="!loading && errorMessage" class="state-box error-box">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ errorMessage }}</p>
+    <ion-button fill="outline" size="small" (click)="loadWorkoutDays()">
+      Retry
+    </ion-button>
+  </section>
+
+  <section *ngIf="!loading && !errorMessage && historyDays.length === 0" class="state-box">
+    <ion-icon name="calendar-clear-outline"></ion-icon>
+    <p>No workout history yet. Start logging sets to build your timeline.</p>
+  </section>
+
+  <ion-accordion-group *ngIf="!loading && !errorMessage && historyDays.length > 0">
+    <ion-accordion
+      *ngFor="let day of historyDays; trackBy: trackByDay"
+      [value]="day.logDate">
+      <ion-item slot="header" (click)="onDayHeaderClick(day)">
+        <ion-label>
+          <h2>{{ formatDate(day.logDate) }}</h2>
+          <p>{{ day.setsCount }} sets | {{ formatVolume(day.totalVolume) }} lbs total workload</p>
+        </ion-label>
+        <ion-badge *ngIf="day.completed" color="success">Completed</ion-badge>
+      </ion-item>
+
+      <div slot="content" class="day-content">
+        <div *ngIf="day.detailsLoading" class="inline-loader">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Loading details...</span>
+        </div>
+
+        <div *ngIf="!day.detailsLoading && day.exerciseGroups.length === 0" class="empty-day-details">
+          No set details available for this day.
+        </div>
+
+        <ion-accordion-group
+          *ngIf="!day.detailsLoading && day.exerciseGroups.length > 0"
+          class="exercise-group-accordion">
+          <ion-accordion
+            *ngFor="let group of day.exerciseGroups; trackBy: trackByExerciseGroup"
+            [value]="group.exerciseName">
+            <ion-item slot="header">
+              <ion-label>{{ group.exerciseName }}</ion-label>
+              <ion-badge color="medium">{{ group.sets.length }} sets</ion-badge>
+            </ion-item>
+
+            <div slot="content" class="set-list">
+              <div *ngFor="let set of group.sets; let i = index" class="set-line">
+                <span>Set {{ i + 1 }}</span>
+                <span>{{ set.reps }} reps</span>
+                <span>{{ set.weight }} lbs</span>
+              </div>
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
+      </div>
+    </ion-accordion>
+  </ion-accordion-group>
+</ion-content>
+

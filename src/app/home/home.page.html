@@ -1,74 +1,69 @@
 <ion-content class="home-bg">
-  <section class="home-header">
-    <div class="header-copy">
-      <h1>Today's Workout</h1>
-      <p *ngIf="!isRestDay && splitLabel">{{ splitLabel }}</p>
+  <div class="home-header">
+    <div class="title-wrap">
+      <h1>Today's Training</h1>
+      <p *ngIf="!isRestDay && splitName">{{ splitName }}</p>
       <p *ngIf="isRestDay">Rest Day</p>
     </div>
     <ion-icon name="barbell-outline" class="header-icon"></ion-icon>
-  </section>
+  </div>
 
-  <section *ngIf="loading" class="state-box">
+  <div *ngIf="loading" class="state-box">
     <ion-spinner name="crescent"></ion-spinner>
-    <p>Loading your workout...</p>
-  </section>
+    <p>Loading your split...</p>
+  </div>
 
-  <section *ngIf="!loading && errorMessage" class="state-box error-box">
+  <div *ngIf="!loading && errorMessage" class="state-box error-box">
     <ion-icon name="alert-circle-outline"></ion-icon>
     <p>{{ errorMessage }}</p>
-    <ion-button fill="outline" size="small" (click)="loadTodayWorkout()">
+    <ion-button size="small" fill="outline" (click)="loadHomeData()">
       Retry
     </ion-button>
-  </section>
+  </div>
 
   <ion-card *ngIf="!loading && !errorMessage && isRestDay" class="rest-card">
     <ion-card-content>
       <ion-icon name="leaf-outline" class="rest-icon"></ion-icon>
-      <h2>Rest Day</h2>
-      <p>Recover today. Consistency over intensity builds long-term progress.</p>
+      <h2>Rest &amp; Recovery</h2>
+      <p>Recovery is part of progress. Refuel, reset, and come back stronger.</p>
     </ion-card-content>
   </ion-card>
 
   <div *ngIf="!loading && !errorMessage && !isRestDay">
     <ion-card *ngIf="exercises.length === 0" class="state-card">
       <ion-card-content>
-        No exercises are mapped for this split yet.
+        No exercises configured for today yet.
       </ion-card-content>
     </ion-card>
 
-    <ion-card
-      *ngFor="let exercise of exercises; trackBy: trackByExerciseId"
-      class="exercise-card"
-      [class.completed]="completedMap[exercise.id]"
-    >
-      <ion-card-content class="exercise-content">
-        <div class="thumb-wrap" *ngIf="exercise.media_path; else noThumb">
+    <ion-list *ngIf="exercises.length > 0" class="exercise-list">
+      <ion-item
+        *ngFor="let exercise of exercises; trackBy: trackByExercise"
+        [class.completed]="completedMap[exercise.id]"
+        lines="none"
+        class="exercise-item"
+      >
+        <ion-thumbnail slot="start" *ngIf="exercise.media_path; else noThumb">
           <img [src]="exercise.media_path" [alt]="exercise.name" />
-        </div>
+        </ion-thumbnail>
 
         <ng-template #noThumb>
-          <div class="thumb-wrap thumb-placeholder">
+          <div class="thumb-placeholder" slot="start">
             <ion-icon name="image-outline"></ion-icon>
           </div>
         </ng-template>
 
-        <div class="exercise-main">
-          <div class="exercise-title-row">
-            <h3>{{ exercise.name }}</h3>
+        <ion-label>
+          <div class="name-row">
+            <h2>{{ exercise.name }}</h2>
             <ion-icon
               *ngIf="completedMap[exercise.id]"
               name="checkmark-circle"
               class="done-icon"
             ></ion-icon>
           </div>
-          <p>{{ exercise.body_part || 'General' }}</p>
-          <ion-button
-            fill="clear"
-            size="small"
-            (click)="openExerciseDetail(exercise.id)">
-            Details
-          </ion-button>
-        </div>
+          <p>{{ exercise.body_part || 'Unspecified' }}</p>
+        </ion-label>
 
         <ion-toggle
           slot="end"
@@ -77,7 +72,7 @@
           [disabled]="isTogglePending(exercise.id)"
           (ionChange)="onCompletionToggle(exercise.id, $event.detail.checked)"
         ></ion-toggle>
-      </ion-card-content>
-    </ion-card>
+      </ion-item>
+    </ion-list>
   </div>
 </ion-content>

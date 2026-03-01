@@ -1,0 +1,92 @@
+:host {
+  --surface: #121722;
+  --card: #1a2231;
+  --line: #2f3d53;
+  --text: #e7edf5;
+  --muted: #96a6be;
+}
+
+.history-content {
+  --background: linear-gradient(180deg, #101522 0%, #131a27 100%);
+}
+
+.state-box {
+  margin: 18px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.state-box ion-icon {
+  font-size: 28px;
+}
+
+.error-box {
+  color: #ff9b9b;
+}
+
+ion-accordion-group {
+  padding: 10px 14px 24px;
+}
+
+ion-accordion {
+  margin-bottom: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+ion-item {
+  --background: transparent;
+  --color: var(--text);
+}
+
+ion-item p {
+  color: var(--muted);
+}
+
+.day-content {
+  padding: 8px 10px 12px;
+}
+
+.inline-loader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  padding: 6px 6px 12px;
+}
+
+.empty-day-details {
+  color: var(--muted);
+  padding: 8px 6px;
+  font-size: 0.92rem;
+}
+
+.exercise-group-accordion {
+  padding: 0;
+}
+
+.set-list {
+  padding: 0 6px 8px;
+}
+
+.set-line {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 10px;
+  border: 1px solid #33435c;
+  border-radius: 10px;
+  margin-bottom: 7px;
+  color: var(--muted);
+  background: #202a3d;
+}

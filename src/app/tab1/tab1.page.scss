@@ -1,0 +1,143 @@
+.home-bg {
+  --background: #0f141b;
+}
+
+.home-header {
+  padding: 22px 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+  background: linear-gradient(135deg, #11273a 0%, #1d3a52 60%, #27577a 100%);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.header-copy h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.header-copy p {
+  margin: 4px 0 0;
+  color: #c5d8e6;
+  font-size: 14px;
+}
+
+.header-icon {
+  font-size: 30px;
+  color: #8fd5ff;
+}
+
+.state-box {
+  margin: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #1a2530;
+  color: #dbe6ee;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.error-box {
+  border: 1px solid #ff6f6f;
+}
+
+.rest-card {
+  margin: 16px;
+  background: #15241a;
+  border-left: 4px solid #4dd27a;
+}
+
+.rest-card ion-card-content {
+  text-align: center;
+  color: #e9f7ee;
+}
+
+.rest-icon {
+  font-size: 52px;
+  color: #4dd27a;
+  margin-bottom: 8px;
+}
+
+.state-card {
+  margin: 16px;
+  background: #1a2530;
+  color: #dbe6ee;
+}
+
+.exercise-card {
+  margin: 12px 16px;
+  border-radius: 14px;
+  background: #1a2530;
+  border: 1px solid #27384a;
+}
+
+.exercise-card.completed {
+  opacity: 0.75;
+  border-color: #45bf6f;
+  background: #173022;
+}
+
+.exercise-content {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.thumb-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #233242;
+}
+
+.thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94aec3;
+}
+
+.exercise-main {
+  min-width: 0;
+}
+
+.exercise-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exercise-title-row h3 {
+  margin: 0;
+  color: #f2f8fc;
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exercise-main p {
+  margin: 4px 0 0;
+  color: #a6bdce;
+  font-size: 13px;
+}
+
+.done-icon {
+  color: #4dd27a;
+  font-size: 18px;
+}

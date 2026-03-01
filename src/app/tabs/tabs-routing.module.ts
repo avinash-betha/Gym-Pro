@@ -1,36 +1,70 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { AdminGuard } from '../auth/admin.guard';
 
 const routes: Routes = [
   {
-    path: 'tabs',
+    path: '',
     component: TabsPage,
     children: [
       {
         path: 'tab1',
-        loadChildren: () => import('../tab1/tab1.module').then(m => m.Tab1PageModule)
+        loadComponent: () =>
+          import('../tab1/tab1.page').then((m) => m.Tab1Page),
+      },
+      {
+        path: 'history',
+        loadChildren: () =>
+          import('../history/history.module').then((m) => m.HistoryPageModule),
+      },
+      {
+        path: 'analytics',
+        loadChildren: () =>
+          import('../analytics/analytics.module').then(
+            (m) => m.AnalyticsPageModule
+          ),
+      },
+      {
+        path: 'profile',
+        loadChildren: () =>
+          import('../profile/profile.module').then((m) => m.ProfilePageModule),
+      },
+      {
+        path: 'admin',
+        canActivate: [AdminGuard],
+        loadChildren: () =>
+          import('../admin/admin.module').then((m) => m.AdminPageModule),
       },
       {
         path: 'tab2',
-        loadChildren: () => import('../tab2/tab2.module').then(m => m.Tab2PageModule)
+        redirectTo: 'history',
+        pathMatch: 'full',
       },
       {
         path: 'tab3',
-        loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
+        redirectTo: 'analytics',
+        pathMatch: 'full',
+      },
+      {
+        path: 'tab4',
+        redirectTo: 'profile',
+        pathMatch: 'full',
+      },
+      {
+        path: 'exercise/:id',
+        loadComponent: () =>
+          import('../exercise-detail/exercise-detail.page').then(
+            (m) => m.ExerciseDetailPage
+          ),
       },
       {
         path: '',
-        redirectTo: '/tabs/tab1',
-        pathMatch: 'full'
-      }
-    ]
+        redirectTo: 'tab1',
+        pathMatch: 'full',
+      },
+    ],
   },
-  {
-    path: '',
-    redirectTo: '/tabs/tab1',
-    pathMatch: 'full'
-  }
 ];
 
 @NgModule({

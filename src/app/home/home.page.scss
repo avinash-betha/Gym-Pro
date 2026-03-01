@@ -1,0 +1,137 @@
+.home-bg {
+  --background: #0e1217;
+}
+
+.home-header {
+  padding: 22px 18px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+  background: linear-gradient(135deg, #142330 0%, #1b3448 60%, #244964 100%);
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+}
+
+.title-wrap h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.title-wrap p {
+  margin: 4px 0 0;
+  color: #bcd2df;
+  font-size: 14px;
+}
+
+.header-icon {
+  font-size: 28px;
+  color: #87d5ff;
+}
+
+.state-box {
+  margin: 16px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #1a232d;
+  color: #d7e2ea;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.error-box {
+  border: 1px solid #ff7b7b;
+  color: #ffd2d2;
+}
+
+.rest-card {
+  margin: 16px;
+  border-left: 4px solid #5ed47b;
+  background: #15231b;
+}
+
+.rest-card ion-card-content {
+  text-align: center;
+  color: #e5f7eb;
+}
+
+.rest-icon {
+  font-size: 30px;
+  color: #5ed47b;
+  margin-bottom: 8px;
+}
+
+.state-card {
+  margin: 16px;
+  background: #1a232d;
+  color: #d7e2ea;
+}
+
+.exercise-list {
+  background: transparent;
+  padding: 10px 12px 20px;
+}
+
+.exercise-item {
+  --background: #1a232d;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #273646;
+}
+
+.exercise-item.completed {
+  --background: #16261b;
+  border-color: #4ac46a;
+  opacity: 0.95;
+}
+
+ion-thumbnail {
+  --size: 56px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+ion-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  background: #223140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ab4c8;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name-row h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #eef6fb;
+}
+
+ion-label p {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #9fb4c3;
+}
+
+.done-icon {
+  color: #5ed47b;
+  font-size: 18px;
+}

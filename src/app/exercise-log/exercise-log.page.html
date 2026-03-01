@@ -1,0 +1,70 @@
+<ion-content class="log-bg">
+
+  <!-- Header -->
+  <div class="log-header">
+    <ion-button fill="clear" (click)="goBack()">
+      <ion-icon name="arrow-back-outline"></ion-icon>
+    </ion-button>
+    <h2>{{ exerciseName }}</h2>
+  </div>
+
+  <!-- Sets -->
+  <ion-card *ngFor="let set of sets; let i = index" class="set-card">
+    <ion-card-content class="set-row">
+
+      <!-- Set index -->
+      <div class="set-index">
+        Set {{ i + 1 }}
+      </div>
+
+      <!-- Reps -->
+      <ion-input
+        type="number"
+        label="Reps"
+        labelPlacement="floating"
+        placeholder="Enter reps"
+        [(ngModel)]="set.reps">
+      </ion-input>
+
+      <!-- Weight -->
+      <ion-input
+        type="number"
+        label="Weight"
+        labelPlacement="floating"
+        placeholder="lbs"
+        [(ngModel)]="set.weight">
+      </ion-input>
+
+      <!-- Remove set -->
+      <ion-button
+        fill="clear"
+        color="danger"
+        (click)="removeSet(i)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Actions -->
+  <div class="actions">
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="success"
+      (click)="addSet()">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Add Set
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      color="success"
+      (click)="saveWorkout()">
+      Save Workout
+    </ion-button>
+
+  </div>
+
+</ion-content>

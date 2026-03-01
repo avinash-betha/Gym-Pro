@@ -1,0 +1,96 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>Analytics</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="analytics-content">
+  <section *ngIf="loading" class="state-box">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading analytics...</p>
+  </section>
+
+  <section *ngIf="!loading && errorMessage" class="state-box error-box">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ errorMessage }}</p>
+    <ion-button fill="outline" size="small" (click)="loadAnalytics()">
+      Retry
+    </ion-button>
+  </section>
+
+  <div *ngIf="!loading && !errorMessage" class="content-wrap">
+    <ion-card class="filter-card">
+      <ion-card-header>
+        <ion-card-title>Filters</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chip-row">
+          <ion-chip
+            *ngFor="let days of rangeOptions"
+            [class.active]="selectedFilterDays === days"
+            (click)="setFilter(days)">
+            <ion-label>{{ days }} Days</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="chart-card">
+      <ion-card-header>
+        <ion-card-title class="title-with-icon">
+          <span>Exercise Progress</span>
+          <ion-icon
+            name="information-circle-outline"
+            class="info-icon"
+            (click)="openExerciseInfo()"
+            aria-label="Exercise metrics info">
+          </ion-icon>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none" class="select-item">
+          <ion-label>Exercise</ion-label>
+          <ion-select
+            interface="popover"
+            [value]="selectedExerciseId"
+            (ionChange)="onExerciseChange($event.detail.value)">
+            <ion-select-option
+              *ngFor="let exercise of exercises"
+              [value]="exercise.id">
+              {{ exercise.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <div class="chart-wrap" *ngIf="hasExerciseData; else noExerciseData">
+          <canvas #exerciseChartCanvas></canvas>
+        </div>
+        <ng-template #noExerciseData>
+          <p class="empty-copy">No exercise data found for this range.</p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="chart-card">
+      <ion-card-header>
+        <ion-card-title class="title-with-icon">
+          <span>Body Weight Progress</span>
+          <ion-icon
+            name="information-circle-outline"
+            class="info-icon"
+            (click)="openBodyWeightInfo()"
+            aria-label="Body weight chart info">
+          </ion-icon>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="chart-wrap" *ngIf="hasWeightData; else noWeightData">
+          <canvas #weightChartCanvas></canvas>
+        </div>
+        <ng-template #noWeightData>
+          <p class="empty-copy">No body weight logs in this range.</p>
+        </ng-template>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

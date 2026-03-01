@@ -1,0 +1,155 @@
+:host {
+  --surface: #f4f6fb;
+  --card: #ffffff;
+  --line: #e4e8f0;
+  --text: #111827;
+  --muted: #6b7280;
+  --success: #22c55e;
+}
+
+ion-content.admin-content {
+  --background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.container {
+  padding: 16px 14px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-card {
+  margin: 0;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  background: var(--card);
+}
+
+.form-list {
+  background: transparent;
+  margin-bottom: 12px;
+}
+
+.form-list ion-item {
+  --background: #f9fafb;
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 0;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.split-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  --border-color: transparent;
+}
+
+.split-row {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.split-meta {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.exercise-header {
+  --background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.exercise-content {
+  padding: 8px 4px 14px;
+}
+
+.media-box {
+  border: 1px dashed #cfd8e6;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 14px;
+  background: #f8fafc;
+}
+
+.media-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.file-name {
+  margin-top: 8px;
+  display: block;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.preview-wrap {
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #000;
+}
+
+.preview-wrap img,
+.preview-wrap video {
+  width: 100%;
+  display: block;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  padding: 20px 10px 6px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-state ion-icon {
+  font-size: 36px;
+  color: #64748b;
+}
+
+.empty-inline {
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.confirm-content {
+  --background: #f8fafc;
+}
+
+.confirm-card {
+  padding: 24px 16px;
+}
+
+.confirm-card p {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--muted);
+}
+
+.confirm-card strong {
+  color: var(--text);
+}

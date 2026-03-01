@@ -1,0 +1,33 @@
+<ion-content fullscreen class="login-bg">
+  <div class="login-container">
+
+    <h1 class="app-title">Gym Tracker</h1>
+    <p class="subtitle">Sign in to continue</p>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        type="email"
+        placeholder="Email"
+        [(ngModel)]="email">
+      </ion-input>
+    </ion-item>
+
+    <ion-item fill="outline" class="input-item">
+      <ion-input
+        type="password"
+        placeholder="Password"
+        [(ngModel)]="password">
+      </ion-input>
+    </ion-item>
+
+    <ion-button expand="block" class="login-btn" (click)="login()">
+      Login
+    </ion-button>
+
+    <ion-text class="signup-text">
+      Don’t have an account?
+      <span class="signup-link" (click)="goToRegister()">Create Account</span>
+    </ion-text>
+
+  </div>
+</ion-content>

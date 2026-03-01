@@ -1,0 +1,463 @@
+<ion-header translucent="true">
+  <ion-toolbar>
+    <ion-title>Admin Panel</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment mode="ios" [(ngModel)]="activeTab">
+      <ion-segment-button value="splits">
+        <ion-label>Splits</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="exercises">
+        <ion-label>Exercises</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen class="admin-content">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshAdminData($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="container">
+    <ng-container *ngIf="activeTab === 'splits'">
+      <ion-card class="admin-card">
+        <ion-card-header>
+          <ion-card-title>Add Split</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-list lines="none" class="form-list">
+            <ion-item>
+              <ion-input
+                label="Split Label"
+                labelPlacement="stacked"
+                placeholder="Push Day"
+                [(ngModel)]="newSplitLabel">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-select
+                label="Day Of Week"
+                labelPlacement="stacked"
+                placeholder="Select day"
+                [ngModel]="newSplitDayOfWeek"
+                (ngModelChange)="newSplitDayOfWeek = coerceDayOfWeek($event)">
+                <ion-select-option
+                  *ngFor="let day of dayOptions"
+                  [value]="day.value">
+                  {{ day.label }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" (click)="addSplit()">
+            Add Split
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="admin-card">
+        <ion-card-header>
+          <ion-card-title>Workout Splits</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-list lines="full" *ngIf="splits.length > 0; else noSplitsState">
+            <ion-item
+              *ngFor="let split of splits; trackBy: trackBySplitId"
+              class="split-item">
+              <div class="split-row">
+                <div class="split-meta">
+                  <ion-chip color="primary" outline="true">
+                    {{ getDayLabel(split.dayOfWeek) }}
+                  </ion-chip>
+                </div>
+
+                <ion-input
+                  class="split-input"
+                  label="Split Label"
+                  labelPlacement="stacked"
+                  [ngModel]="split.draftLabel"
+                  (ngModelChange)="split.draftLabel = $event ?? ''">
+                </ion-input>
+
+                <ion-select
+                  class="split-select"
+                  label="Day"
+                  labelPlacement="stacked"
+                  [ngModel]="split.draftDayOfWeek"
+                  (ngModelChange)="split.draftDayOfWeek = coerceDayOfWeek($event) ?? split.draftDayOfWeek">
+                  <ion-select-option
+                    *ngFor="let day of dayOptions"
+                    [value]="day.value">
+                    {{ day.label }}
+                  </ion-select-option>
+                </ion-select>
+
+                <div class="actions">
+                  <ion-button size="small" fill="solid" (click)="saveSplit(split)">
+                    Save
+                  </ion-button>
+                  <ion-button
+                    size="small"
+                    fill="outline"
+                    color="danger"
+                    (click)="openDeleteSplitConfirmation(split)">
+                    Delete
+                  </ion-button>
+                </div>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+
+    <ng-container *ngIf="activeTab === 'exercises'">
+      <ion-card class="admin-card">
+        <ion-card-header>
+          <ion-card-title>Add Exercise</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-list lines="none" class="form-list">
+            <ion-item>
+              <ion-input
+                label="Name"
+                labelPlacement="stacked"
+                placeholder="Barbell Bench Press"
+                [(ngModel)]="newExerciseName">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input
+                label="Body Part"
+                labelPlacement="stacked"
+                placeholder="Chest"
+                [(ngModel)]="newExerciseBodyPart">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input
+                type="number"
+                label="Sort Order"
+                labelPlacement="stacked"
+                [ngModel]="newExerciseSortOrder"
+                (ngModelChange)="newExerciseSortOrder = coerceSortOrder($event)">
+              </ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-select
+                label="Split"
+                labelPlacement="stacked"
+                placeholder="Select split"
+                [(ngModel)]="newExerciseSplitId">
+                <ion-select-option
+                  *ngFor="let split of splits; trackBy: trackBySplitId"
+                  [value]="split.id">
+                  {{ split.splitLabel }}
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            <ion-item>
+              <ion-textarea
+                label="Instructions"
+                labelPlacement="stacked"
+                autoGrow="true"
+                placeholder="Add execution notes"
+                [(ngModel)]="newExerciseInstructions">
+              </ion-textarea>
+            </ion-item>
+          </ion-list>
+
+          <div class="media-box">
+            <input
+              hidden
+              #newExerciseFileInput
+              type="file"
+              [accept]="acceptedMediaTypes"
+              (change)="onNewExerciseMediaSelected($event)" />
+
+            <div class="media-actions">
+              <ion-button
+                size="small"
+                fill="outline"
+                (click)="newExerciseFileInput.click()">
+                <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                Choose Media
+              </ion-button>
+              <ion-button
+                size="small"
+                fill="clear"
+                color="medium"
+                *ngIf="newExerciseFile"
+                (click)="removeNewExerciseSelectedMedia()">
+                Remove Selected
+              </ion-button>
+            </div>
+
+            <ion-note *ngIf="newExerciseFileName" class="file-name">
+              {{ newExerciseFileName }}
+            </ion-note>
+
+            <div class="preview-wrap" *ngIf="newExercisePreviewUrl as previewUrl">
+              <video *ngIf="isNewExercisePreviewVideo(); else newImagePreview" controls preload="metadata">
+                <source [src]="previewUrl" />
+              </video>
+              <ng-template #newImagePreview>
+                <img [src]="previewUrl" alt="Exercise preview" />
+              </ng-template>
+            </div>
+          </div>
+
+          <ion-button expand="block" (click)="addExercise()">
+            Save Exercise
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="admin-card">
+        <ion-card-header>
+          <ion-card-title>Exercise Library</ion-card-title>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-accordion-group *ngIf="exercises.length > 0; else noExercisesState">
+            <ion-accordion
+              *ngFor="let exercise of exercises; trackBy: trackByExerciseId"
+              [value]="exercise.id">
+              <ion-item slot="header" lines="none" class="exercise-header">
+                <ion-label>
+                  <h3>{{ exercise.name }}</h3>
+                  <p>{{ exercise.bodyPart || 'No body part' }}</p>
+                  <ion-badge [color]="exercise.draftSplitId ? 'success' : 'danger'">
+                    {{ getSplitLabelById(exercise.draftSplitId) }}
+                  </ion-badge>
+                </ion-label>
+                <ion-chip color="medium" outline="true">#{{ exercise.sortOrder }}</ion-chip>
+              </ion-item>
+
+              <div class="exercise-content" slot="content">
+                <ion-list lines="none" class="form-list">
+                  <ion-item>
+                    <ion-input
+                      label="Name"
+                      labelPlacement="stacked"
+                      [ngModel]="exercise.draftName"
+                      (ngModelChange)="exercise.draftName = $event ?? ''">
+                    </ion-input>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-input
+                      label="Body Part"
+                      labelPlacement="stacked"
+                      [ngModel]="exercise.draftBodyPart"
+                      (ngModelChange)="exercise.draftBodyPart = $event ?? ''">
+                    </ion-input>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-input
+                      type="number"
+                      label="Sort Order"
+                      labelPlacement="stacked"
+                      [ngModel]="exercise.draftSortOrder"
+                      (ngModelChange)="exercise.draftSortOrder = coerceSortOrder($event)">
+                    </ion-input>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-select
+                      label="Split"
+                      labelPlacement="stacked"
+                      [ngModel]="exercise.draftSplitId ?? '__none__'"
+                      (ngModelChange)="exercise.draftSplitId = normalizeSplitSelection($event)">
+                      <ion-select-option value="__none__">Not mapped</ion-select-option>
+                      <ion-select-option
+                        *ngFor="let split of splits; trackBy: trackBySplitId"
+                        [value]="split.id">
+                        {{ split.splitLabel }}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+
+                  <ion-item>
+                    <ion-textarea
+                      label="Instructions"
+                      labelPlacement="stacked"
+                      autoGrow="true"
+                      [ngModel]="exercise.draftInstructions"
+                      (ngModelChange)="exercise.draftInstructions = $event ?? ''">
+                    </ion-textarea>
+                  </ion-item>
+                </ion-list>
+
+                <div class="media-box">
+                  <input
+                    hidden
+                    #exerciseFileInput
+                    type="file"
+                    [accept]="acceptedMediaTypes"
+                    (change)="onExerciseMediaSelected(exercise, $event)" />
+
+                  <div class="media-actions">
+                    <ion-button
+                      size="small"
+                      fill="outline"
+                      (click)="exerciseFileInput.click()">
+                      <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                      Select Media
+                    </ion-button>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      color="medium"
+                      *ngIf="exercise.pendingFile"
+                      (click)="removeExercisePendingMedia(exercise)">
+                      Remove Selected
+                    </ion-button>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      color="danger"
+                      *ngIf="!exercise.removeExistingMedia && (exercise.mediaPath || exercise.pendingFile)"
+                      (click)="markExerciseMediaForRemoval(exercise)">
+                      Remove Media
+                    </ion-button>
+                    <ion-button
+                      size="small"
+                      fill="clear"
+                      color="primary"
+                      *ngIf="exercise.removeExistingMedia"
+                      (click)="undoExerciseMediaRemoval(exercise)">
+                      Undo Remove
+                    </ion-button>
+                  </div>
+
+                  <ion-note *ngIf="exercise.pendingFileName" class="file-name">
+                    {{ exercise.pendingFileName }}
+                  </ion-note>
+
+                  <div class="preview-wrap" *ngIf="getExercisePreviewUrl(exercise) as previewUrl; else noMediaState">
+                    <video *ngIf="isExercisePreviewVideo(exercise); else exerciseImagePreview" controls preload="metadata">
+                      <source [src]="previewUrl" />
+                    </video>
+                    <ng-template #exerciseImagePreview>
+                      <img [src]="previewUrl" alt="Exercise media preview" />
+                    </ng-template>
+                  </div>
+                  <ng-template #noMediaState>
+                    <div class="empty-inline">No media selected</div>
+                  </ng-template>
+                </div>
+
+                <div class="actions">
+                  <ion-button fill="solid" (click)="saveExercise(exercise)">
+                    Save Changes
+                  </ion-button>
+                  <ion-button
+                    fill="outline"
+                    color="danger"
+                    (click)="openDeleteExerciseConfirmation(exercise)">
+                    Delete
+                  </ion-button>
+                </div>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+        </ion-card-content>
+      </ion-card>
+    </ng-container>
+  </div>
+
+  <ng-template #noSplitsState>
+    <div class="empty-state">
+      <ion-icon name="calendar-clear-outline"></ion-icon>
+      <h3>No splits yet</h3>
+      <p>Create your first workout split.</p>
+    </div>
+  </ng-template>
+
+  <ng-template #noExercisesState>
+    <div class="empty-state">
+      <ion-icon name="barbell-outline"></ion-icon>
+      <h3>No exercises yet</h3>
+      <p>Add an exercise to start building your split library.</p>
+    </div>
+  </ng-template>
+</ion-content>
+
+<ion-modal [isOpen]="!!splitPendingDelete" (didDismiss)="closeDeleteSplitConfirmation()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Delete Split</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="confirm-content">
+      <div class="confirm-card">
+        <p>
+          Delete
+          <strong>{{ splitPendingDelete?.splitLabel }}</strong>
+          from
+          <strong>{{ getDayLabel(splitPendingDelete?.dayOfWeek ?? 0) }}</strong>?
+        </p>
+        <p *ngIf="splitPendingDeleteMappedCount > 0">
+          Deleting this split will unmap
+          <strong>
+            {{ splitPendingDeleteMappedCount }}
+            exercise{{ splitPendingDeleteMappedCount === 1 ? '' : 's' }}
+          </strong>.
+          Continue?
+        </p>
+        <p *ngIf="splitPendingDeleteMappedCount === 0">This action cannot be undone.</p>
+
+        <div class="actions">
+          <ion-button expand="block" fill="outline" (click)="closeDeleteSplitConfirmation()">
+            Cancel
+          </ion-button>
+          <ion-button expand="block" color="danger" (click)="confirmDeleteSplit()">
+            Delete Split
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="!!exercisePendingDelete" (didDismiss)="closeDeleteExerciseConfirmation()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Delete Exercise</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="confirm-content">
+      <div class="confirm-card">
+        <p>
+          Delete
+          <strong>{{ exercisePendingDelete?.name }}</strong>
+          from your exercise library?
+        </p>
+        <p>This action cannot be undone.</p>
+
+        <div class="actions">
+          <ion-button expand="block" fill="outline" (click)="closeDeleteExerciseConfirmation()">
+            Cancel
+          </ion-button>
+          <ion-button expand="block" color="danger" (click)="confirmDeleteExercise()">
+            Delete Exercise
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
