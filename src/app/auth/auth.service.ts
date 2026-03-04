@@ -36,6 +36,12 @@ export class AuthService {
       return signUpResult;
     }
 
+    // If email confirmation is enabled, signUp usually returns no active session.
+    // In that case, profile creation should be handled by a DB trigger on auth.users.
+    if (!signUpResult.data.session) {
+      return signUpResult;
+    }
+
     const { error: profileError } = await this.supabaseService.client
       .from('profiles')
       .upsert(
