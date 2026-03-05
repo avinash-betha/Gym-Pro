@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from '../shared/services/supabase.service';
+import { environment } from '../../environments/environment';
 
 type UserRole = 'admin' | 'user';
 
@@ -21,10 +22,14 @@ export class AuthService {
     password: string,
     meta: { name: string; mobile: string }
   ) {
+    const emailRedirectTo =
+      environment.authRedirectTo || `${window.location.origin}/login`;
+
     const signUpResult = await this.supabaseService.client.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo,
         data: {
           name: meta.name,
           mobile: meta.mobile,

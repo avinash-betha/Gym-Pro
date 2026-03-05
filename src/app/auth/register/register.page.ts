@@ -53,7 +53,15 @@ export class RegisterPage {
     await loading.dismiss();
 
     if (error) {
-      this.showToast(error.message, 'danger');
+      const message = this.getRegisterErrorMessage(error.message);
+      const color =
+        message === 'Account already exists. Please login.'
+          ? 'warning'
+          : 'danger';
+      this.showToast(message, color);
+      if (message === 'Account already exists. Please login.') {
+        this.router.navigate(['/login']);
+      }
       return;
     }
 
@@ -63,6 +71,20 @@ export class RegisterPage {
 
   goToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  private getRegisterErrorMessage(rawMessage: string): string {
+    const message = (rawMessage || '').toLowerCase();
+
+    if (message.includes('user already registered')) {
+      return 'Account already exists. Please login.';
+    }
+
+    if (message.includes('email rate limit exceeded')) {
+      return 'Too many attempts. Please try again in a few minutes.';
+    }
+
+    return rawMessage || 'Unable to create account right now.';
   }
 
   async showToast(
